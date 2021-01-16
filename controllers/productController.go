@@ -32,6 +32,13 @@ type updateProductForm struct {
 	Image *multipart.FileHeader `form:"image" binding:"required"`
 }
 
+type patchUpdateProductForm struct {
+	Name  string                `form:"name"`
+	Desc  string                `form:"desc"`
+	Price int                   `form:"price"`
+	Image *multipart.FileHeader `form:"image"`
+}
+
 type productRespons struct {
 	ID    uint   `json:"id"`
 	Name  string `json:"name"`
@@ -40,17 +47,26 @@ type productRespons struct {
 	Image string `json:"image"`
 }
 
+type producsPaging struct {
+	Items  []productRespons `json:"items"`
+	Paging *pagingResult    `json:"paging"`
+}
+
+//FindAll - query-proucts 
 func (p *Product) FindAll(ctx *gin.Context) {
 	products := []models.Product{}
-	if err := p.DB.Find(&products).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
+
+	paging := pagingResource(ctx, p.DB, &products)
+
+	// if err := p.DB.Find(&products).Error; err != nil {
+	// 	ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	// 	return
+	// }
 
 	serializedProducts := []productRespons{}
 	copier.Copy(&serializedProducts, &products)
 
-	ctx.JSON(http.StatusOK, gin.H{"products": serializedProducts})
+	ctx.JSON(http.StatusOK, gin.H{"products": producsPaging{Items: serializedProducts, Paging: paging}})
 }
 
 // FindOne - /:id
@@ -91,8 +107,8 @@ func (p *Product) Create(ctx *gin.Context) {
 
 }
 
-// Update - update all
-func (p *Product) Update(ctx *gin.Context) {
+// UpdateAll - update all
+func (p *Product) UpdateAll(ctx *gin.Context) {
 	var form updateProductForm
 	if err := ctx.ShouldBind(&form); err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

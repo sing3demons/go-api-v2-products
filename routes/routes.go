@@ -16,7 +16,7 @@ func Serve(r *gin.Engine) {
 		productGroup.GET("", productController.FindAll)
 		productGroup.GET("/:id", productController.FindOne)
 		productGroup.POST("", productController.Create)
-		productGroup.PUT("/:id", productController.Update)
+		productGroup.PUT("/:id", productController.UpdateAll)
 		productGroup.DELETE("/:id", productController.Delete)
 	}
 }
