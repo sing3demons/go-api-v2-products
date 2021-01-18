@@ -56,7 +56,13 @@ type producsPaging struct {
 func (p *Product) FindAll(ctx *gin.Context) {
 	products := []models.Product{}
 
-	paging := pagingResource(ctx, p.DB, &products)
+
+	pagination := pagination{
+		ctx: ctx,
+		query: p.DB,
+		records: &products,
+	}
+	paging := pagination.pagingResource()
 
 	// if err := p.DB.Find(&products).Error; err != nil {
 	// 	ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

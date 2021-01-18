@@ -17,15 +17,21 @@ type pagingResult struct {
 	TotalPage int `json:"totalPage"`
 }
 
-func pagingResource(ctx *gin.Context, query *gorm.DB, records interface{}) *pagingResult {
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "12"))
+type pagination struct {
+	ctx     *gin.Context
+	query   *gorm.DB
+	records interface{}
+}
+
+func (p *pagination) pagingResource() *pagingResult {
+	page, _ := strconv.Atoi(p.ctx.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(p.ctx.DefaultQuery("limit", "12"))
 
 	ch := make(chan int)
-	go countRecords(query, records, ch)
+	go p.countRecords(ch)
 
 	offset := (page - 1) * limit
-	query.Offset(offset).Limit(limit).Find(records)
+	p.query.Offset(offset).Limit(limit).Find(p.records)
 
 	count := <-ch
 	totalPage := int(math.Ceil(float64(count) / float64(limit)))
@@ -48,9 +54,9 @@ func pagingResource(ctx *gin.Context, query *gorm.DB, records interface{}) *pagi
 
 }
 
-func countRecords(query *gorm.DB, records interface{}, ch chan int) {
+func (p *pagination) countRecords(ch chan int) {
 	var count int64
-	query.Model(records).Count(&count)
+	p.query.Model(p.records).Count(&count)
 
 	ch <- int(count)
 }
