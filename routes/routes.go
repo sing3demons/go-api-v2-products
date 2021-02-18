@@ -10,7 +10,19 @@ import (
 //Serve - middleware
 func Serve(r *gin.Engine) {
 	db := config.GetDB()
-	productGroup := r.Group("/api/v1/products")
+	v1 := r.Group("/api/v1")
+
+	categoryGroup := v1.Group("/categories")
+	categoryController := controllers.Category{DB: db}
+	{
+		categoryGroup.GET("", categoryController.FindAll)
+		categoryGroup.GET("/:id", categoryController.FindOne)
+		categoryGroup.POST("", categoryController.Create)
+		categoryGroup.PUT("/:id", categoryController.Update)
+		categoryGroup.DELETE("/:id", categoryController.Delete)
+	}
+
+	productGroup := v1.Group("/products")
 	productController := controllers.Product{DB: db}
 	{
 		productGroup.GET("", productController.FindAll)

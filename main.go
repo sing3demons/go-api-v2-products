@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,7 +21,8 @@ func main() {
 	config.InitDB()
 
 	r := gin.Default()
-
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowAllOrigins = true
 	r.Static("/uploads", "./uploads")
 
 	//สร้าง folder
@@ -30,6 +32,6 @@ func main() {
 	}
 
 	routes.Serve(r)
-
+	r.Use(cors.New(corsConfig))
 	r.Run(":" + os.Getenv("PORT"))
 }

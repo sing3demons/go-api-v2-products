@@ -1,3 +1,4 @@
 .env
 tmp
 uploads
+.DS_Store
