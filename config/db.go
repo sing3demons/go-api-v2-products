@@ -19,7 +19,8 @@ func InitDB() {
 	// Migrate the schema
 	database.AutoMigrate(&models.Product{})
 	database.AutoMigrate(&models.Category{})
-	// database.Migrator().DropTable(&models.Product{})
+	database.AutoMigrate(&models.User{})
+	// database.Migrator().DropTable(&models.User{})
 
 	db = database
 }
