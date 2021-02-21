@@ -1,9 +1,14 @@
 package controllers
 
 import (
+	"app/config"
 	"app/models"
+	"fmt"
 	"mime/multipart"
 	"net/http"
+	"os"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -36,7 +41,10 @@ type authResponse struct {
 //GetProfile - GET /api/v1/profile
 func (a *Auth) GetProfile(ctx *gin.Context) {
 	sub, _ := ctx.Get("jwt_id")
-	ctx.JSON(http.StatusOK, gin.H{"user": sub})
+	var user models.User = sub.(models.User)
+	var serializedUser userResponse
+	copier.Copy(&serializedUser, &user)
+	ctx.JSON(http.StatusOK, gin.H{"user": serializedUser})
 }
 
 //SignUp - POST /api/v1/register
@@ -59,9 +67,57 @@ func (a *Auth) SignUp(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"user": serializedUser, "message": "ลงทะเบียนสำเร็จ"})
 }
 
-//SignIn - POST /api/v1/login
-func (a *Auth) SignIn(ctx *gin.Context) {
+//UpdateProfile - PUT /api/v1/profile
+func (a *Auth) UpdateProfile(ctx *gin.Context) {
+	form := updateProfileForm{}
+	if err := ctx.ShouldBind(&form); err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	sub, _ := ctx.Get("jwt_id")
+	// fmt.Print(sub)
+	user := sub.(models.User)
+	fmt.Print(user)
+
+	// users := models.User{}
+	copier.Copy(&user, &form)
+
+	if err := a.DB.Save(&user).Error; err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		return
+	}
+
+	setUserImage(ctx, &user)
+
+	var serializedUser userResponse
+	copier.Copy(&serializedUser, &user)
+	ctx.JSON(http.StatusOK, gin.H{"user": serializedUser})
+
 }
 
-//UpdateProfile - PUT /api/v1/profile
-func (a *Auth) UpdateProfile(ctx *gin.Context) {}
+func setUserImage(ctx *gin.Context, user *models.User) error {
+	file, _ := ctx.FormFile("avatar")
+	if file == nil {
+		return nil
+	}
+
+	if user.Avatar != "" {
+		user.Avatar = strings.Replace(user.Avatar, os.Getenv("HOST"), "", 1)
+		pwd, _ := os.Getwd()
+		os.Remove(pwd + user.Avatar)
+	}
+
+	path := "uploads/users/" + strconv.Itoa(int(user.ID))
+	os.MkdirAll(path, os.ModePerm)
+	filename := path + "/" + file.Filename
+	if err := ctx.SaveUploadedFile(file, filename); err != nil {
+		return nil
+	}
+
+	db := config.GetDB()
+	user.Avatar = os.Getenv("HOST") + "/" + filename
+	db.Save(user)
+
+	return nil
+}

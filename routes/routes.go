@@ -14,13 +14,15 @@ func Serve(r *gin.Engine) {
 	db := config.GetDB()
 	v1 := r.Group("/api/v1")
 
+	authenticate := middleware.JwtVerify()
+
 	authGroup := v1.Group("/auth")
 	authController := controllers.Auth{DB: db}
 	{
-		authGroup.GET("/profile", middleware.JwtVerify(), authController.GetProfile)
+		authGroup.GET("/profile", authenticate, authController.GetProfile)
 		authGroup.POST("register", authController.SignUp)
 		authGroup.POST("/login", middleware.Login)
-		authGroup.PUT("/profile", authController.UpdateProfile)
+		authGroup.PUT("/profile/:id", authenticate, authController.UpdateProfile)
 	}
 
 	categoryGroup := v1.Group("/categories")

@@ -20,11 +20,7 @@ type formLogin struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type userResponse struct {
-	ID    uint   `json:"id"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
-}
+
 
 //Login - sign in
 func Login(c *gin.Context) {
@@ -59,16 +55,23 @@ func jwtSign(user models.User) (string, error) {
 	atClaims["id"] = user.ID
 	atClaims["exp"] = time.Now().Add(time.Minute * 15).Local().Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
-	return at.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	token, err := at.SignedString([]byte(os.Getenv("SECRET_KEY")))
+
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 
 }
 
 //JwtVerify - call this methos to add interceptor
 func JwtVerify() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if strings.Split(c.Request.Header["Authorization"][0], " ")[1] == "" {
-			fmt.Print("err")
+		if c.Request.Header["Authorization"] == nil {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "token not is empty"})
+			return
 		}
+
 		tokenString := strings.Split(c.Request.Header["Authorization"][0], " ")[1]
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -94,9 +97,7 @@ func JwtVerify() gin.HandlerFunc {
 			fmt.Println(err.Error())
 		}
 
-		var serializedUser userResponse
-		copier.Copy(&serializedUser, &user)
-		c.Set("jwt_id", serializedUser)
+		c.Set("jwt_id", user)
 
 		c.Next()
 	}
