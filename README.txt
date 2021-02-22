@@ -1,3 +1,4 @@
+alias air='/Users/sing3demons/go/bin/air'
 go mod init kp-app
 
    gin = https://github.com/gin-gonic/gin    

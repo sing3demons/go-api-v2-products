@@ -3,7 +3,6 @@ package controllers
 import (
 	"app/config"
 	"app/models"
-	"fmt"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -67,6 +66,20 @@ func (a *Auth) SignUp(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"user": serializedUser, "message": "ลงทะเบียนสำเร็จ"})
 }
 
+//UpdateImageProfile - upload image
+func (a *Auth) UpdateImageProfile(ctx *gin.Context) {
+
+	sub, _ := ctx.Get("jwt_id")
+	user := sub.(models.User)
+
+	setUserImage(ctx, &user)
+
+	var serializedUser userResponse
+	copier.Copy(&serializedUser, &user)
+	ctx.JSON(http.StatusOK, gin.H{"user": serializedUser})
+
+}
+
 //UpdateProfile - PUT /api/v1/profile
 func (a *Auth) UpdateProfile(ctx *gin.Context) {
 	form := updateProfileForm{}
@@ -76,11 +89,7 @@ func (a *Auth) UpdateProfile(ctx *gin.Context) {
 	}
 
 	sub, _ := ctx.Get("jwt_id")
-	// fmt.Print(sub)
 	user := sub.(models.User)
-	fmt.Print(user)
-
-	// users := models.User{}
 	copier.Copy(&user, &form)
 
 	if err := a.DB.Save(&user).Error; err != nil {
