@@ -15,6 +15,7 @@ func Serve(r *gin.Engine) {
 	v1 := r.Group("/api/v1")
 
 	authenticate := middleware.JwtVerify()
+	authorize := middleware.Authorize()
 
 	authGroup := v1.Group("/auth")
 	authController := controllers.Auth{DB: db}
@@ -38,9 +39,11 @@ func Serve(r *gin.Engine) {
 
 	productGroup := v1.Group("/products")
 	productController := controllers.Product{DB: db}
+	productGroup.GET("", productController.FindAll)
+	productGroup.GET("/:id", productController.FindOne)
+
+	productGroup.Use(authenticate, authorize)
 	{
-		productGroup.GET("", productController.FindAll)
-		productGroup.GET("/:id", productController.FindOne)
 		productGroup.POST("", productController.Create)
 		productGroup.PUT("/:id", productController.UpdateAll)
 		productGroup.DELETE("/:id", productController.Delete)
@@ -48,7 +51,7 @@ func Serve(r *gin.Engine) {
 
 	usersGroup := v1.Group("/users")
 	usersController := controllers.Users{DB: db}
-	usersGroup.Use(authenticate)
+	usersGroup.Use(authenticate, authorize)
 	{
 		usersGroup.GET("", usersController.FindAll)
 		usersGroup.POST("", usersController.Create)

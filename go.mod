@@ -3,6 +3,8 @@ module app
 go 1.15
 
 require (
+	github.com/casbin/casbin v1.9.1
+	github.com/casbin/casbin/v2 v2.23.4 // indirect
 	github.com/cosmtrek/air v1.21.2 // indirect
 	github.com/creack/pty v1.1.11 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
