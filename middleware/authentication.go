@@ -20,8 +20,6 @@ type formLogin struct {
 	Password string `json:"password" binding:"required"`
 }
 
-
-
 //Login - sign in
 func Login(c *gin.Context) {
 	var form formLogin
@@ -33,7 +31,7 @@ func Login(c *gin.Context) {
 
 	copier.Copy(&user, &form)
 	db := config.GetDB()
-	if err := db.First(&user).Error; err != nil {
+	if err := db.Where("email = ?", form.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
@@ -45,7 +43,6 @@ func Login(c *gin.Context) {
 
 	jwt, _ := jwtSign(user)
 	serializedUser := jwt
-	// copier.Copy(&form, &user)
 	c.JSON(http.StatusOK, gin.H{"token": serializedUser})
 }
 
@@ -53,7 +50,7 @@ func jwtSign(user models.User) (string, error) {
 	atClaims := jwt.MapClaims{}
 
 	atClaims["id"] = user.ID
-	atClaims["exp"] = time.Now().Add(time.Minute * 15).Local().Unix()
+	atClaims["exp"] = time.Now().Add(time.Hour * 2).Local().Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	token, err := at.SignedString([]byte(os.Getenv("SECRET_KEY")))
 
@@ -97,7 +94,7 @@ func JwtVerify() gin.HandlerFunc {
 			fmt.Println(err.Error())
 		}
 
-		c.Set("jwt_id", user)
+		c.Set("sub", user)
 
 		c.Next()
 	}

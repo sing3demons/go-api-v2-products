@@ -1,13 +1,9 @@
 package controllers
 
 import (
-	"app/config"
 	"app/models"
 	"mime/multipart"
 	"net/http"
-	"os"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -39,7 +35,7 @@ type authResponse struct {
 
 //GetProfile - GET /api/v1/profile
 func (a *Auth) GetProfile(ctx *gin.Context) {
-	sub, _ := ctx.Get("jwt_id")
+	sub, _ := ctx.Get("sub")
 	var user models.User = sub.(models.User)
 	var serializedUser userResponse
 	copier.Copy(&serializedUser, &user)
@@ -69,7 +65,7 @@ func (a *Auth) SignUp(ctx *gin.Context) {
 //UpdateImageProfile - upload image
 func (a *Auth) UpdateImageProfile(ctx *gin.Context) {
 
-	sub, _ := ctx.Get("jwt_id")
+	sub, _ := ctx.Get("sub")
 	user := sub.(models.User)
 
 	setUserImage(ctx, &user)
@@ -88,7 +84,7 @@ func (a *Auth) UpdateProfile(ctx *gin.Context) {
 		return
 	}
 
-	sub, _ := ctx.Get("jwt_id")
+	sub, _ := ctx.Get("sub")
 	user := sub.(models.User)
 	copier.Copy(&user, &form)
 
@@ -103,30 +99,4 @@ func (a *Auth) UpdateProfile(ctx *gin.Context) {
 	copier.Copy(&serializedUser, &user)
 	ctx.JSON(http.StatusOK, gin.H{"user": serializedUser})
 
-}
-
-func setUserImage(ctx *gin.Context, user *models.User) error {
-	file, _ := ctx.FormFile("avatar")
-	if file == nil {
-		return nil
-	}
-
-	if user.Avatar != "" {
-		user.Avatar = strings.Replace(user.Avatar, os.Getenv("HOST"), "", 1)
-		pwd, _ := os.Getwd()
-		os.Remove(pwd + user.Avatar)
-	}
-
-	path := "uploads/users/" + strconv.Itoa(int(user.ID))
-	os.MkdirAll(path, os.ModePerm)
-	filename := path + "/" + file.Filename
-	if err := ctx.SaveUploadedFile(file, filename); err != nil {
-		return nil
-	}
-
-	db := config.GetDB()
-	user.Avatar = os.Getenv("HOST") + "/" + filename
-	db.Save(user)
-
-	return nil
 }

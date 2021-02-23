@@ -45,4 +45,17 @@ func Serve(r *gin.Engine) {
 		productGroup.PUT("/:id", productController.UpdateAll)
 		productGroup.DELETE("/:id", productController.Delete)
 	}
+
+	usersGroup := v1.Group("/users")
+	usersController := controllers.Users{DB: db}
+	usersGroup.Use(authenticate)
+	{
+		usersGroup.GET("", usersController.FindAll)
+		usersGroup.POST("", usersController.Create)
+		usersGroup.GET("/:id", usersController.FindOne)
+		usersGroup.PUT("/:id", usersController.Update)
+		usersGroup.DELETE("/:id", usersController.Delete)
+		usersGroup.PATCH("/:id/promote", usersController.Promote)
+		usersGroup.PATCH("/:id/demote", usersController.Demote)
+	}
 }
