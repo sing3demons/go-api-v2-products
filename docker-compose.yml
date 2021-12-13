@@ -23,28 +23,28 @@ services:
        - ./_data/redis:/data
        - ./config/redis_cfg/redis.conf:/redis.conf
       command: redis-server /redis.conf
-    # webapi:
-    #   container_name: webapi
-    #   image: go-api-v2-product:0.0.1
-    #   build: .
-    #   ports:
-    #     - ${PORT}:${PORT}
-    #   restart: always
-    #   environment:
-    #     - PORT=${PORT}
-    #     - DB_USER=${DB_USER}
-    #     - DB_NAME=${DB_NAME}
-    #     - DB_PASSWORD=${DB_PASSWORD}
-    #     - DB_PORT=${DB_PORT}
-    #     - DB_HOST=${DB_HOST}
-    #     - SECRET_KEY=${SECRET_KEY}
-    #     - APP_ENV=${APP_ENV}
-    #     - GIN_MODE=${GIN_MODE}
-    #     - REDIS_HOST=${REDIS_HOST}
-    #   volumes:
-    #     - "./uploads:/uploads"
-    #   depends_on:
-    #     - db
-    #     - redis
-    #   links:
-    #     - "db:db"
+    webapi:
+      container_name: webapi
+      image: go-api-v2-product:0.0.2
+      build: .
+      ports:
+        - ${PORT}:${PORT}
+      restart: always
+      environment:
+        - PORT=${PORT}
+        - DB_USER=${DB_USER}
+        - DB_NAME=${DB_NAME}
+        - DB_PASSWORD=${DB_PASSWORD}
+        - DB_PORT=${DB_PORT}
+        - DB_HOST=${DB_HOST}
+        - SECRET_KEY=${SECRET_KEY}
+        - APP_ENV=${APP_ENV}
+        - GIN_MODE=${GIN_MODE}
+        - REDIS_HOST=${REDIS_HOST}
+      volumes:
+        - "./uploads:/uploads"
+      depends_on:
+        - db
+        - redis
+      links:
+        - "db:db"
