@@ -1,11 +1,15 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -21,27 +25,27 @@ type Product struct {
 }
 
 type createProductForm struct {
-	Name  string                `form:"name" binding:"required"`
-	Desc  string                `form:"desc" binding:"required"`
-	Price int                   `form:"price" binding:"required"`
-	Image *multipart.FileHeader `form:"image" binding:"required"`
+	Name       string                `form:"name" binding:"required"`
+	Desc       string                `form:"desc" binding:"required"`
+	Price      int                   `form:"price" binding:"required"`
+	Image      *multipart.FileHeader `form:"image" binding:"required"`
 	CategoryID uint                  `form:"categoryId" binding:"required"`
 }
 
 type updateProductForm struct {
-	Name  string                `form:"name"`
-	Desc  string                `form:"desc"`
-	Price int                   `form:"price"`
-	Image *multipart.FileHeader `form:"image"`
+	Name       string                `form:"name"`
+	Desc       string                `form:"desc"`
+	Price      int                   `form:"price"`
+	Image      *multipart.FileHeader `form:"image"`
 	CategoryID uint                  `form:"categoryId"`
 }
 
 type productRespons struct {
-	ID    uint   `json:"id"`
-	Name  string `json:"name"`
-	Desc  string `json:"desc"`
-	Price int    `json:"price"`
-	Image string `json:"image"`
+	ID         uint   `json:"id"`
+	Name       string `json:"name"`
+	Desc       string `json:"desc"`
+	Price      int    `json:"price"`
+	Image      string `json:"image"`
 	CategoryID uint   `json:"categoryId" binding:"required"`
 	Category   struct {
 		ID   uint   `json:"id"`
@@ -56,25 +60,79 @@ type producsPaging struct {
 
 //FindAll - query-proucts
 func (p *Product) FindAll(ctx *gin.Context) {
-	products := []models.Product{}
+	query1CacheKey := "items::product"
+	query2CacheKey := "items::page"
 
-	query := p.DB.Preload("Category").Order("id desc")
-		if category := ctx.Query("category"); category != "" {
-			c, _ := strconv.Atoi(category)
-			query = query.Where("category_id = ?", c)
+	var serializedProduct []productRespons
+	var paging *pagingResult
+
+	cacheItems, err := p.Cacher.MGet([]string{query1CacheKey, query2CacheKey})
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	productJS := cacheItems[0]
+	pageJS := cacheItems[1]
+
+	if productJS != nil && len(productJS.(string)) > 0 {
+		// ctx.Log("cache hit")
+
+		err := json.Unmarshal([]byte(productJS.(string)), &serializedProduct)
+		if err != nil {
+			p.Cacher.Del(query1CacheKey)
+			log.Println(err.Error())
 		}
 
-	pagination := pagination{
-		ctx:     ctx,
-		query:   p.DB,
-		records: &products,
 	}
-	paging := pagination.pagingResource()
 
-	serializedProducts := []productRespons{}
-	copier.Copy(&serializedProducts, &products)
+	itemToCaches := map[string]interface{}{}
 
-	ctx.JSON(http.StatusOK, gin.H{"products": producsPaging{Items: serializedProducts, Paging: paging}})
+	var paginationItem *pagingResult
+	if productJS == nil {
+		var products []models.Product
+		pagination := pagination{ctx: ctx, query: p.DB, records: &products}
+		paginationItem = pagination.pagingResource()
+		copier.Copy(&serializedProduct, &products)
+
+		itemToCaches[query1CacheKey] = serializedProduct
+	}
+
+	if pageJS != nil && len(pageJS.(string)) > 0 {
+		err := json.Unmarshal([]byte(pageJS.(string)), &paging)
+		if err != nil {
+			p.Cacher.Del(query2CacheKey)
+			log.Println(err.Error())
+		}
+	}
+
+	if paging == nil {
+		paging = paginationItem
+		itemToCaches[query2CacheKey] = paging
+	}
+
+	if len(itemToCaches) > 0 {
+		timeToExpire := 10 * time.Second // m
+		fmt.Println("MSET")
+
+		// Set cache using MSET
+		err := p.Cacher.MSet(itemToCaches)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		// Set time to expire
+		keys := []string{}
+		for k := range itemToCaches {
+			keys = append(keys, k)
+		}
+		err = p.Cacher.Expires(keys, timeToExpire)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"products": producsPaging{Items: serializedProduct, Paging: paging}})
+
 }
 
 // FindOne - /:id

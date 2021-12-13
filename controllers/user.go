@@ -39,11 +39,6 @@ type userResponse struct {
 	Role   string `json:"role"`
 }
 
-type usersPaging struct {
-	Items  []userResponse `json:"items"`
-	Paging *pagingResult  `json:"paging"`
-}
-
 //FindAll - find user
 func (u *Users) FindAll(ctx *gin.Context) {
 	sub, _ := ctx.Get("sub")
