@@ -1,17 +1,22 @@
 package routes
 
 import (
-	"app/config"
-	"app/controllers"
-	"app/middleware"
-
 	"github.com/gin-gonic/gin"
+	"github.com/sing3demons/app/v2/cache"
+	"github.com/sing3demons/app/v2/controllers"
+	"github.com/sing3demons/app/v2/database"
+	"github.com/sing3demons/app/v2/middleware"
 )
+
+func NewCacherConfig() *cache.CacherConfig {
+	return &cache.CacherConfig{}
+}
 
 //Serve - middleware
 func Serve(r *gin.Engine) {
 
-	db := config.GetDB()
+	db := database.GetDB()
+	cacher := cache.NewCacher(NewCacherConfig())
 	v1 := r.Group("/api/v1")
 
 	authenticate := middleware.JwtVerify()
@@ -38,7 +43,7 @@ func Serve(r *gin.Engine) {
 	}
 
 	productGroup := v1.Group("/products")
-	productController := controllers.Product{DB: db}
+	productController := controllers.Product{DB: db, Cacher: cacher}
 	productGroup.GET("", productController.FindAll)
 	productGroup.GET("/:id", productController.FindOne)
 

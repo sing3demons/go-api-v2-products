@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"app/config"
-	"app/models"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,6 +10,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"github.com/sing3demons/app/v2/database"
+	"github.com/sing3demons/app/v2/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -30,7 +30,7 @@ func Login(c *gin.Context) {
 	}
 
 	copier.Copy(&user, &form)
-	db := config.GetDB()
+	db := database.GetDB()
 	if err := db.Where("email = ?", form.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -89,7 +89,7 @@ func JwtVerify() gin.HandlerFunc {
 
 		var user models.User
 		id := fmt.Sprintf("%v", claims["id"])
-		db := config.GetDB()
+		db := database.GetDB()
 		if err := db.First(&user, id).Error; err != nil {
 			fmt.Println(err.Error())
 		}

@@ -30,8 +30,14 @@ func (p *pagination) pagingResource() *pagingResult {
 	ch := make(chan int)
 	go p.countRecords(ch)
 
+	query := p.query.Preload("Category").Order("id desc")
+	if category := p.ctx.Query("category"); category != "" {
+		c, _ := strconv.Atoi(category)
+		query = query.Where("category_id = ?", c)
+	}
+
 	offset := (page - 1) * limit
-	p.query.Offset(offset).Limit(limit).Find(p.records)
+	query.Offset(offset).Limit(limit).Find(p.records)
 
 	count := <-ch
 	totalPage := int(math.Ceil(float64(count) / float64(limit)))

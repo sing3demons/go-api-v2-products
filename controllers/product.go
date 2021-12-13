@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"app/models"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -10,12 +9,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"github.com/sing3demons/app/v2/cache"
+	"github.com/sing3demons/app/v2/models"
 	"gorm.io/gorm"
 )
 
 //Product - struct
 type Product struct {
-	DB *gorm.DB
+	DB     *gorm.DB
+	Cacher *cache.Cacher
 }
 
 type createProductForm struct {
@@ -23,6 +25,7 @@ type createProductForm struct {
 	Desc  string                `form:"desc" binding:"required"`
 	Price int                   `form:"price" binding:"required"`
 	Image *multipart.FileHeader `form:"image" binding:"required"`
+	CategoryID uint                  `form:"categoryId" binding:"required"`
 }
 
 type updateProductForm struct {
@@ -30,6 +33,7 @@ type updateProductForm struct {
 	Desc  string                `form:"desc"`
 	Price int                   `form:"price"`
 	Image *multipart.FileHeader `form:"image"`
+	CategoryID uint                  `form:"categoryId"`
 }
 
 type productRespons struct {
@@ -38,6 +42,11 @@ type productRespons struct {
 	Desc  string `json:"desc"`
 	Price int    `json:"price"`
 	Image string `json:"image"`
+	CategoryID uint   `json:"categoryId" binding:"required"`
+	Category   struct {
+		ID   uint   `json:"id"`
+		Name string `json:"name"`
+	} `json:"category"`
 }
 
 type producsPaging struct {
@@ -48,6 +57,12 @@ type producsPaging struct {
 //FindAll - query-proucts
 func (p *Product) FindAll(ctx *gin.Context) {
 	products := []models.Product{}
+
+	query := p.DB.Preload("Category").Order("id desc")
+		if category := ctx.Query("category"); category != "" {
+			c, _ := strconv.Atoi(category)
+			query = query.Where("category_id = ?", c)
+		}
 
 	pagination := pagination{
 		ctx:     ctx,

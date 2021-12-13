@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"app/models"
 	"mime/multipart"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"github.com/sing3demons/app/v2/models"
 	"gorm.io/gorm"
 )
 

@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"app/config"
-	"app/models"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -11,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"github.com/sing3demons/app/v2/database"
+	"github.com/sing3demons/app/v2/models"
 	"gorm.io/gorm"
 )
 
@@ -195,7 +195,7 @@ func setUserImage(ctx *gin.Context, user *models.User) error {
 		return nil
 	}
 
-	db := config.GetDB()
+	db := database.GetDB()
 	user.Avatar = os.Getenv("HOST") + "/" + filename
 	db.Save(user)
 

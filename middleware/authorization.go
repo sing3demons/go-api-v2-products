@@ -1,11 +1,11 @@
 package middleware
 
 import (
-	"app/models"
 	"net/http"
 
 	"github.com/casbin/casbin"
 	"github.com/gin-gonic/gin"
+	"github.com/sing3demons/app/v2/models"
 )
 
 func Authorize() gin.HandlerFunc {
