@@ -1,7 +1,6 @@
 **/.classpath
 **/.dockerignore
 # **/.env
-**/.git
 **/.gitignore
 **/.project
 **/.settings
@@ -25,7 +24,6 @@ README.md
 .vscode
 textfile.txt
 runtest-products
-README.md
 Procfile
 Makefile
 .env.example

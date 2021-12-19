@@ -53,12 +53,17 @@ type productRespons struct {
 	} `json:"category"`
 }
 
-type producsPaging struct {
+type productsPaging struct {
 	Items  []productRespons `json:"items"`
 	Paging *pagingResult    `json:"paging"`
 }
 
-//FindAll - query-proucts
+type Context interface {
+	Bind(interface{}) error
+	JSON(int, interface{}) error
+}
+
+//FindAll - query-products
 func (p *Product) FindAll(ctx *gin.Context) {
 	query1CacheKey := "items::product"
 	query2CacheKey := "items::page"
@@ -75,8 +80,6 @@ func (p *Product) FindAll(ctx *gin.Context) {
 	pageJS := cacheItems[1]
 
 	if productJS != nil && len(productJS.(string)) > 0 {
-		// ctx.Log("cache hit")
-
 		err := json.Unmarshal([]byte(productJS.(string)), &serializedProduct)
 		if err != nil {
 			p.Cacher.Del(query1CacheKey)
@@ -112,7 +115,7 @@ func (p *Product) FindAll(ctx *gin.Context) {
 
 	if len(itemToCaches) > 0 {
 		timeToExpire := 10 * time.Second // m
-		fmt.Println("MSET")
+		fmt.Println("M_SET")
 
 		// Set cache using MSET
 		err := p.Cacher.MSet(itemToCaches)
@@ -131,7 +134,7 @@ func (p *Product) FindAll(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"products": producsPaging{Items: serializedProduct, Paging: paging}})
+	ctx.JSON(http.StatusOK, gin.H{"products": productsPaging{Items: serializedProduct, Paging: paging}})
 
 }
 
