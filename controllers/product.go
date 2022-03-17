@@ -16,19 +16,7 @@ import (
 	"github.com/sing3demons/app/v2/cache"
 	"github.com/sing3demons/app/v2/models"
 	"github.com/sing3demons/app/v2/store"
-	"gorm.io/gorm"
 )
-
-type storer interface {
-	Find(product interface{}) error
-	Create(product interface{}) error
-	Save(product interface{}) error
-	Delete(product interface{}) error
-	First(product interface{}, id interface{}) error
-	Model(product interface{}) (tx *gorm.DB)
-	Preload(q string) (tx *gorm.DB)
-	Count(count *int64) (tx *gorm.DB)
-}
 
 //Product - struct
 type ProductHandler struct {
@@ -36,8 +24,8 @@ type ProductHandler struct {
 	cacher *cache.Cacher
 }
 
-func NewProductHandler(store *store.GormStore,cacher *cache.Cacher) *ProductHandler {
-	return &ProductHandler{store: store,cacher: cacher}
+func NewProductHandler(store *store.GormStore, cacher *cache.Cacher) *ProductHandler {
+	return &ProductHandler{store: store, cacher: cacher}
 }
 
 type createProductForm struct {
@@ -109,7 +97,8 @@ func (p *ProductHandler) FindAll(ctx *gin.Context) {
 	var paginationItem *pagingResult
 	if productJS == nil {
 		var products []models.Product
-		pagination := pagination{ctx: ctx, query: p.store, records: &products}
+		// pagination := pagination{ctx: ctx, query: p.store, records: &products}
+		pagination := NewPaginationHandler(ctx, p.store, &products)
 		paginationItem = pagination.pagingResource()
 		copier.Copy(&serializedProduct, &products)
 

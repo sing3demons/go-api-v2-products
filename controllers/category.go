@@ -36,7 +36,8 @@ type categoryPaging struct {
 func (c *Category) FindAll(ctx *gin.Context) {
 	var categories []models.Category
 
-	pagination := pagination{ctx: ctx, query: c.store, records: &categories}
+	// pagination := pagination{ctx: ctx, query: c.store, records: &categories}
+	pagination := NewPaginationHandler(ctx, c.store, &categories)
 	p := pagination.pagingResource()
 
 	serializedCategories := []categoryRespons{}

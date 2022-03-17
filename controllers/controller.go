@@ -23,10 +23,16 @@ type pagination struct {
 	records interface{}
 }
 
+func NewPaginationHandler(ctx *gin.Context, query *store.GormStore, records interface{}) *pagination {
+	return &pagination{ctx: ctx,
+		query:   query,
+		records: records}
+}
+
 func (p *pagination) pagingResource() *pagingResult {
 	page, _ := strconv.Atoi(p.ctx.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(p.ctx.DefaultQuery("limit", "12"))
-
+	
 	ch := make(chan int)
 	go p.countRecords(ch)
 
