@@ -14,6 +14,7 @@ import (
 func Load() {
 	if os.Getenv("APP_ENV") != "production" {
 		db := database.GetDB()
+		fmt.Println("Starting...")
 
 		var users []models.User
 		db.Find(&users)
