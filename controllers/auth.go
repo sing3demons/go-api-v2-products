@@ -7,12 +7,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/sing3demons/app/v2/models"
-	"gorm.io/gorm"
+	"github.com/sing3demons/app/v2/store"
 )
 
 //Auth database
 type Auth struct {
-	DB *gorm.DB
+	store *store.GormStore
+}
+
+func NewAuthHandler(store *store.GormStore) *Auth {
+	return &Auth{store: store}
 }
 
 type authForm struct {
@@ -52,7 +56,7 @@ func (a *Auth) SignUp(ctx *gin.Context) {
 	var user models.User
 	copier.Copy(&user, &form)
 	user.Password = user.GenerateEncryptedPassword()
-	if err := a.DB.Create(&user).Error; err != nil {
+	if err := a.store.Create(&user).Error; err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error(), "message": "ลงทะเบียนไม่สำเร็จ"})
 		return
 	}
@@ -88,7 +92,7 @@ func (a *Auth) UpdateProfile(ctx *gin.Context) {
 	user := sub.(models.User)
 	copier.Copy(&user, &form)
 
-	if err := a.DB.Save(&user).Error; err != nil {
+	if err := a.store.Save(&user).Error; err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}

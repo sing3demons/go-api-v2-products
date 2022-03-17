@@ -14,7 +14,6 @@ import (
 	"github.com/sing3demons/app/v2/routes"
 	"github.com/sing3demons/app/v2/seeds"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -41,17 +40,7 @@ func main() {
 	database.InitDB()
 	seeds.Load()
 
-	r := gin.Default()
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{
-		"http://localhost:8080",
-	}
-	config.AllowHeaders = []string{
-		"Origin",
-		"Authorization",
-		"TransactionID",
-	}
-	r.Use(cors.New(config))
+	r := routes.NewMyRouter()
 	r.Static("/uploads", "./uploads")
 
 	r.GET("/healthz", func(c *gin.Context) {

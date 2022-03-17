@@ -15,13 +15,29 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/sing3demons/app/v2/cache"
 	"github.com/sing3demons/app/v2/models"
+	"github.com/sing3demons/app/v2/store"
 	"gorm.io/gorm"
 )
 
+type storer interface {
+	Find(product interface{}) error
+	Create(product interface{}) error
+	Save(product interface{}) error
+	Delete(product interface{}) error
+	First(product interface{}, id interface{}) error
+	Model(product interface{}) (tx *gorm.DB)
+	Preload(q string) (tx *gorm.DB)
+	Count(count *int64) (tx *gorm.DB)
+}
+
 //Product - struct
-type Product struct {
-	DB     *gorm.DB
-	Cacher *cache.Cacher
+type ProductHandler struct {
+	store  *store.GormStore
+	cacher *cache.Cacher
+}
+
+func NewProductHandler(store *store.GormStore,cacher *cache.Cacher) *ProductHandler {
+	return &ProductHandler{store: store,cacher: cacher}
 }
 
 type createProductForm struct {
@@ -64,14 +80,14 @@ type Context interface {
 }
 
 //FindAll - query-products
-func (p *Product) FindAll(ctx *gin.Context) {
+func (p *ProductHandler) FindAll(ctx *gin.Context) {
 	query1CacheKey := "items::product"
 	query2CacheKey := "items::page"
 
 	var serializedProduct []productRespons
 	var paging *pagingResult
 
-	cacheItems, err := p.Cacher.MGet([]string{query1CacheKey, query2CacheKey})
+	cacheItems, err := p.cacher.MGet([]string{query1CacheKey, query2CacheKey})
 	if err != nil {
 		log.Println(err.Error())
 	}
@@ -82,7 +98,7 @@ func (p *Product) FindAll(ctx *gin.Context) {
 	if productJS != nil && len(productJS.(string)) > 0 {
 		err := json.Unmarshal([]byte(productJS.(string)), &serializedProduct)
 		if err != nil {
-			p.Cacher.Del(query1CacheKey)
+			p.cacher.Del(query1CacheKey)
 			log.Println(err.Error())
 		}
 
@@ -93,7 +109,7 @@ func (p *Product) FindAll(ctx *gin.Context) {
 	var paginationItem *pagingResult
 	if productJS == nil {
 		var products []models.Product
-		pagination := pagination{ctx: ctx, query: p.DB, records: &products}
+		pagination := pagination{ctx: ctx, query: p.store, records: &products}
 		paginationItem = pagination.pagingResource()
 		copier.Copy(&serializedProduct, &products)
 
@@ -103,7 +119,7 @@ func (p *Product) FindAll(ctx *gin.Context) {
 	if pageJS != nil && len(pageJS.(string)) > 0 {
 		err := json.Unmarshal([]byte(pageJS.(string)), &paging)
 		if err != nil {
-			p.Cacher.Del(query2CacheKey)
+			p.cacher.Del(query2CacheKey)
 			log.Println(err.Error())
 		}
 	}
@@ -118,7 +134,7 @@ func (p *Product) FindAll(ctx *gin.Context) {
 		fmt.Println("M_SET")
 
 		// Set cache using MSET
-		err := p.Cacher.MSet(itemToCaches)
+		err := p.cacher.MSet(itemToCaches)
 		if err != nil {
 			log.Println(err.Error())
 		}
@@ -128,7 +144,7 @@ func (p *Product) FindAll(ctx *gin.Context) {
 		for k := range itemToCaches {
 			keys = append(keys, k)
 		}
-		err = p.Cacher.Expires(keys, timeToExpire)
+		err = p.cacher.Expires(keys, timeToExpire)
 		if err != nil {
 			log.Println(err.Error())
 		}
@@ -139,7 +155,7 @@ func (p *Product) FindAll(ctx *gin.Context) {
 }
 
 // FindOne - /:id
-func (p *Product) FindOne(ctx *gin.Context) {
+func (p *ProductHandler) FindOne(ctx *gin.Context) {
 	product, err := p.findProductByID(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -152,7 +168,7 @@ func (p *Product) FindOne(ctx *gin.Context) {
 }
 
 // Create - insert data
-func (p *Product) Create(ctx *gin.Context) {
+func (p *ProductHandler) Create(ctx *gin.Context) {
 	var form createProductForm
 	if err := ctx.ShouldBind(&form); err != nil {
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
@@ -162,8 +178,8 @@ func (p *Product) Create(ctx *gin.Context) {
 	var product models.Product
 	copier.Copy(&product, &form)
 
-	if err := p.DB.Create(&product).Error; err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+	if err := p.store.Create(&product).Error; err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
 		return
 	}
 
@@ -177,7 +193,7 @@ func (p *Product) Create(ctx *gin.Context) {
 }
 
 // UpdateAll - update all
-func (p *Product) UpdateAll(ctx *gin.Context) {
+func (p *ProductHandler) UpdateAll(ctx *gin.Context) {
 	var form updateProductForm
 	if err := ctx.ShouldBind(&form); err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
@@ -192,8 +208,8 @@ func (p *Product) UpdateAll(ctx *gin.Context) {
 
 	copier.Copy(&product, &form)
 
-	if err := p.DB.Save(&product).Error; err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+	if err := p.store.Save(product).Error; err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
 		return
 	}
 
@@ -206,32 +222,32 @@ func (p *Product) UpdateAll(ctx *gin.Context) {
 }
 
 // Delete - Delete product
-func (p *Product) Delete(ctx *gin.Context) {
+func (p *ProductHandler) Delete(ctx *gin.Context) {
 	product, err := p.findProductByID(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := p.DB.Unscoped().Delete(&product).Error; err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+	if err := p.store.Delete(product).Error; err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "deleted...."})
 }
 
-func (p *Product) findProductByID(ctx *gin.Context) (*models.Product, error) {
+func (p *ProductHandler) findProductByID(ctx *gin.Context) (*models.Product, error) {
 	var product models.Product
 	id := ctx.Param("id")
 
-	if err := p.DB.First(&product, id).Error; err != nil {
+	if err := p.store.First(&product, id).Error; err != nil {
 		return nil, err
 	}
 
 	return &product, nil
 }
 
-func (p *Product) setProductImage(ctx *gin.Context, products *models.Product) error {
+func (p *ProductHandler) setProductImage(ctx *gin.Context, products *models.Product) error {
 	file, err := ctx.FormFile("image")
 	if err != nil || file == nil {
 		return nil
@@ -253,7 +269,7 @@ func (p *Product) setProductImage(ctx *gin.Context, products *models.Product) er
 
 	products.Image = os.Getenv("HOST") + "/" + filename
 
-	p.DB.Save(products)
+	p.store.Save(products)
 
 	return nil
 }

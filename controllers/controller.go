@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"github.com/sing3demons/app/v2/store"
 )
 
 type pagingResult struct {
@@ -19,7 +19,7 @@ type pagingResult struct {
 
 type pagination struct {
 	ctx     *gin.Context
-	query   *gorm.DB
+	query   *store.GormStore
 	records interface{}
 }
 
@@ -30,10 +30,10 @@ func (p *pagination) pagingResource() *pagingResult {
 	ch := make(chan int)
 	go p.countRecords(ch)
 
-	query := p.query.Preload("Category").Order("id desc")
+	query := p.query.PreloadAndOrder("Category", "id desc")
 	if category := p.ctx.Query("category"); category != "" {
 		c, _ := strconv.Atoi(category)
-		query = query.Where("category_id = ?", c)
+		query = p.query.Where("Category", "id desc", "category_id = ?", c)
 	}
 
 	offset := (page - 1) * limit
@@ -62,7 +62,7 @@ func (p *pagination) pagingResource() *pagingResult {
 
 func (p *pagination) countRecords(ch chan int) {
 	var count int64
-	p.query.Model(p.records).Count(&count)
+	p.query.Count(p.records, &count)
 
 	ch <- int(count)
 }

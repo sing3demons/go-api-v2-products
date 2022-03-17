@@ -24,7 +24,7 @@ type formLogin struct {
 func Login(c *gin.Context) {
 	var form formLogin
 	var user models.User
-	if err := c.ShouldBindJSON(&form); err != nil {
+	if err := c.BindJSON(&form); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"status": "unable to bind data"})
 		return
 	}

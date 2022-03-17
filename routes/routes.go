@@ -6,6 +6,7 @@ import (
 	"github.com/sing3demons/app/v2/controllers"
 	"github.com/sing3demons/app/v2/database"
 	"github.com/sing3demons/app/v2/middleware"
+	"github.com/sing3demons/app/v2/store"
 )
 
 func NewCacherConfig() *cache.CacherConfig {
@@ -19,21 +20,24 @@ func Serve(r *gin.Engine) {
 	cacher := cache.NewCacher(NewCacherConfig())
 	v1 := r.Group("/api/v1")
 
+	store := store.NewGormStorm(db)
+
 	authenticate := middleware.JwtVerify()
 	authorize := middleware.Authorize()
 
 	authGroup := v1.Group("/auth")
-	authController := controllers.Auth{DB: db}
+	authController := controllers.NewAuthHandler(store)
 	{
-		authGroup.GET("/profile", authenticate, authController.GetProfile)
 		authGroup.POST("/register", authController.SignUp)
 		authGroup.POST("/login", middleware.Login)
-		authGroup.PATCH("/profile/:id", authenticate, authController.UpdateImageProfile)
-		authGroup.PUT("/profile/:id", authenticate, authController.UpdateProfile)
+		authGroup.Use(authenticate)
+		authGroup.GET("/profile", authController.GetProfile)
+		authGroup.PATCH("/profile/:id", authController.UpdateImageProfile)
+		authGroup.PUT("/profile/:id", authController.UpdateProfile)
 	}
 
 	categoryGroup := v1.Group("/categories")
-	categoryController := controllers.Category{DB: db}
+	categoryController := controllers.NewCategoryHandler(store)
 	{
 		categoryGroup.GET("", categoryController.FindAll)
 		categoryGroup.GET("/:id", categoryController.FindOne)
@@ -43,7 +47,7 @@ func Serve(r *gin.Engine) {
 	}
 
 	productGroup := v1.Group("/products")
-	productController := controllers.Product{DB: db, Cacher: cacher}
+	productController := controllers.NewProductHandler(store, cacher)
 	productGroup.GET("", productController.FindAll)
 	productGroup.GET("/:id", productController.FindOne)
 

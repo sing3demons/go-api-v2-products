@@ -6,12 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/sing3demons/app/v2/models"
-	"gorm.io/gorm"
+	"github.com/sing3demons/app/v2/store"
 )
+
+func NewCategoryHandler(store *store.GormStore) *Category {
+	return &Category{store: store}
+}
 
 //Category return database
 type Category struct {
-	DB *gorm.DB
+	store *store.GormStore
 }
 
 type categoryForm struct {
@@ -32,7 +36,7 @@ type categoryPaging struct {
 func (c *Category) FindAll(ctx *gin.Context) {
 	var categories []models.Category
 
-	pagination := pagination{ctx: ctx, query: c.DB, records: &categories}
+	pagination := pagination{ctx: ctx, query: c.store, records: &categories}
 	p := pagination.pagingResource()
 
 	serializedCategories := []categoryRespons{}
@@ -65,8 +69,8 @@ func (c *Category) Create(ctx *gin.Context) {
 	var category models.Category
 	copier.Copy(&category, &form)
 
-	if err := c.DB.Create(&category).Error; err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+	if err := c.store.Create(&category).Error; err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
 		return
 	}
 
@@ -90,7 +94,7 @@ func (c *Category) Update(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DB.Model(&category).Update("name", form.Name).Error; err != nil {
+	if err := c.store.Update(&category, "name", form.Name).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
@@ -107,8 +111,8 @@ func (c *Category) Delete(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.DB.Unscoped().Delete(&category).Error; err != nil {
-		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+	if err := c.store.Delete(&category).Error; err != nil {
+		ctx.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
@@ -117,7 +121,7 @@ func (c *Category) Delete(ctx *gin.Context) {
 func (c *Category) findCategoryByID(ctx *gin.Context) (*models.Category, error) {
 	var category models.Category
 	id := ctx.Param("id")
-	if err := c.DB.First(&category, id).Error; err != nil {
+	if err := c.store.First(&category, id).Error; err != nil {
 		return nil, err
 	}
 	return &category, nil
