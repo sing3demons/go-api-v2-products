@@ -11,10 +11,11 @@ import (
 
 //Serve - middleware
 func Serve(r *gin.Engine) {
-
 	db := database.GetDB()
 	cacher := cache.NewCacher(cache.NewCacherConfig())
-	v1 := r.Group("/api/v1")
+
+	apiVersion := "/api/v1"
+	v1 := r.Group(apiVersion)
 
 	store := store.NewGormStorm(db)
 

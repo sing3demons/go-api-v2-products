@@ -4,11 +4,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type gormStore interface {
-	Preload(query string, args ...interface{})
-	Order(value interface{})
-}
-
 type GormStore struct {
 	db *gorm.DB
 }
@@ -44,7 +39,7 @@ func (s *GormStore) PreloadAndOrder(preload string, order interface{}) *gorm.DB 
 func (tx *GormStore) Model(value interface{}) *gorm.DB {
 	return tx.db.Model(value)
 }
-func (tx *GormStore) Count(value interface{},count *int64) *gorm.DB {
+func (tx *GormStore) Count(value interface{}, count *int64) *gorm.DB {
 	return tx.db.Model(value).Count(count)
 }
 
