@@ -9,15 +9,11 @@ import (
 	"github.com/sing3demons/app/v2/store"
 )
 
-func NewCacherConfig() *cache.CacherConfig {
-	return &cache.CacherConfig{}
-}
-
 //Serve - middleware
 func Serve(r *gin.Engine) {
 
 	db := database.GetDB()
-	cacher := cache.NewCacher(NewCacherConfig())
+	cacher := cache.NewCacher(cache.NewCacherConfig())
 	v1 := r.Group("/api/v1")
 
 	store := store.NewGormStorm(db)

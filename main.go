@@ -23,19 +23,21 @@ var (
 	buildtime   = time.Now().String()
 )
 
-func main() {
-	_, err := os.Create("/tmp/live")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.Remove("/tmp/live")
-
+func init() {
 	if os.Getenv("APP_ENV") != "production" {
 		err := godotenv.Load(".env")
 		if err != nil {
 			log.Println("Error loading .env file")
 		}
 	}
+}
+
+func main() {
+	_, err := os.Create("/tmp/live")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove("/tmp/live")
 
 	database.InitDB()
 	seeds.Load()

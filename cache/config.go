@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+// func NewCacherConfig() *cache.CacherConfig {
+// 	return &cache.CacherConfig{}
+// }
+
 type IConfig interface {
 	CacherConfig() ICacherConfig
 }
