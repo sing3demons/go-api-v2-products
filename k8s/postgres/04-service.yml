@@ -6,8 +6,8 @@ metadata:
 spec:
   selector:
     app: postgres
-  type: NodePort
+  # type: NodePort
   ports:
   - port: 5432
     targetPort: 5432
-    nodePort: 30001
+    # nodePort: 30001

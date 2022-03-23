@@ -9,7 +9,7 @@ services:
         POSTGRES_PASSWORD: ${DB_PASSWORD}
       restart: always
       ports:
-        - ${DB_PORT}:${DB_PORT}
+        - 5432:5432
       volumes:
         - ./_data/pg_data:/var/lib/postgresql/data
     redis:
@@ -23,28 +23,29 @@ services:
        - ./_data/redis:/data
        - ./config/redis_cfg/redis.conf:/redis.conf
       command: redis-server /redis.conf
-    # webapi:
-    #   container_name: webapi
-    #   # image: go-api-v2-product:0.0.2
-    #   build: .
-    #   ports:
-    #     - ${PORT}:${PORT}
-    #   restart: always
-    #   environment:
-    #     - PORT=${PORT}
-    #     - DB_USER=${DB_USER}
-    #     - DB_NAME=${DB_NAME}
-    #     - DB_PASSWORD=${DB_PASSWORD}
-    #     - DB_PORT=${DB_PORT}
-    #     - DB_HOST=${DB_HOSTV2}
-    #     - SECRET_KEY=${SECRET_KEY}
-    #     - APP_ENV=${APP_ENV}
-    #     - GIN_MODE=${GIN_MODE}
-    #     - REDIS_HOST=${REDIS_HOSTV2}
-    #   volumes:
-    #     - "./uploads:/uploads"
-    #   depends_on:
-    #     - db
-    #     - redis
-    #   links:
-    #     - "db:db"
+    webapi:
+      container_name: webapi
+      image: go-api-v2-product:0.0.3
+      build: .
+      ports:
+        - ${PORT}:${PORT}
+      restart: always
+      environment:
+        - PORT=${PORT}
+        - DB_USER=${DB_USER}
+        - DB_NAME=${DB_NAME}
+        - DB_PASSWORD=${DB_PASSWORD}
+        - DB_PORT=${DB_PORT}
+        - DB_HOST=${DB_HOSTV2}
+        - SECRET_KEY=${SECRET_KEY}
+        - APP_ENV=${APP_ENV}
+        - GIN_MODE=${GIN_MODE}
+        - REDIS_HOST=${REDIS_HOSTV2}
+        - REDIS_PORT=6379
+      volumes:
+        - "./uploads:/uploads"
+      depends_on:
+        - db
+        - redis
+      links:
+        - "db:db"
