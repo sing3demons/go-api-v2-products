@@ -12,7 +12,7 @@ RUN go build \
     -o /go/bin/app
 
 ## Deploy
-FROM alpine:latest  
+FROM alpine:3.15  
 WORKDIR /
 
 COPY --from=builder /go/bin/app /app

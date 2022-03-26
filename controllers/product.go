@@ -72,7 +72,7 @@ func (p *ProductHandler) FindAll(ctx *gin.Context) {
 	query1CacheKey := "items::product"
 	query2CacheKey := "items::page"
 
-	var serializedProduct []productRespons
+	serializedProduct := []productRespons{}
 	var paging *pagingResult
 
 	cacheItems, err := p.cacher.MGet([]string{query1CacheKey, query2CacheKey})
