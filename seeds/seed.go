@@ -12,24 +12,28 @@ import (
 )
 
 func Load() {
-	if os.Getenv("APP_ENV") != "production" {
-		db := database.GetDB()
-		fmt.Println("Starting...")
-
-		var users []models.User
-		db.Find(&users)
-		if len(users) == 0 {
-			fmt.Println("Creating users...")
-			db.Migrator().DropTable(&models.User{})
-			db.AutoMigrate(&models.User{})
-			user := models.User{
-				Email:    "admin@dev.com",
-				Password: "admin1234",
-				Role:     "Admin",
-			}
-			user.Password = user.GenerateEncryptedPassword()
-			db.Create(&user)
+	db := database.GetDB()
+	var users []models.User
+	db.Find(&users)
+	if len(users) == 0 {
+		password := os.Getenv("DB_PASSWORD")
+		if password == "" {
+			password = "12345678"
 		}
+
+		db.Migrator().DropTable(&models.User{})
+		db.AutoMigrate(&models.User{})
+		user := models.User{
+			Email:    "admin@dev.com",
+			Password: password,
+			Role:     "Admin",
+		}
+		user.Password = user.GenerateEncryptedPassword()
+		db.Create(&user)
+	}
+	if os.Getenv("APP_ENV") != "production" {
+
+		fmt.Println("Starting...")
 
 		var categories []models.Category
 		err := db.Find(&categories).Error

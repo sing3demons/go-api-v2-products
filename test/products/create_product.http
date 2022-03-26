@@ -7,11 +7,19 @@ Content-Type: application/json
 
 {
     "email": "admin@dev.com",
-    "password": "admin1234"
+    "password": "12345678"
 }
 
 ###
 @token = {{auth.response.body.$.token}}
+
+### category
+POST {{apiUrl}}/api/v1/categories HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Name#1"
+}
 
 ### Create 
 POST {{apiUrl}}/api/v1/products HTTP/1.1
