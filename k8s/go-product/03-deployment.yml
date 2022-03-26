@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-server
+  namespace: go-product
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      name: server-pods
+      labels:
+        app: server
+    spec:
+      containers:
+      - name: server
+        image: sing3demons/go-api-v2-product:0.0.3
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        livenessProbe:
+          exec:
+            command:
+              - cat
+              - /tmp/live
+          initialDelaySeconds: 5
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
+        env:
+          - name: PORT
+            value: "8080"
+          - name: APP_ENV
+            value: dev
+          - name: SECRET_KEY
+            value: 711E9CB1-3059-44FC-B8F7-59D8DE148CF1
+          - name: DB_USER
+            value: postgres
+          - name: DB_NAME
+            value: product_shop
+          - name: DB_PASSWORD
+            value: "12345678"
+          - name: DB_PORT
+            value: "5432"
+          - name: DB_HOST
+            value: postgres-service.postgres
+          - name: GIN_MODE
+            value: debug
+          - name: REDIS_HOST
+            value: redis-client.redis
+          - name: REDIS_PORT
+            value: "6379"
+        resources:
+          # requests:
+          #   memory: 500Mi
+          #   cpu: 200m
+          # limits:
+          #   memory: "1Gi"
+          #   cpu: "500m"
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+            - mountPath: /uploads
+              name: go-product
+      volumes:
+        - name: go-product
+          persistentVolumeClaim:
+            claimName: app-pvc 

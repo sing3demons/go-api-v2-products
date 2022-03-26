@@ -17,9 +17,9 @@ spec:
         image: redis:6.2.6-alpine
         imagePullPolicy: Always
         resources:
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
+          # limits:
+          #   memory: "1Gi"
+          #   cpu: "500m"
         ports:
         - containerPort: 6373
         env:
