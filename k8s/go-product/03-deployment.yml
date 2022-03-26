@@ -39,7 +39,7 @@ spec:
           - name: PORT
             value: "8080"
           - name: APP_ENV
-            value: dev
+            value: production
           - name: SECRET_KEY
             value: 711E9CB1-3059-44FC-B8F7-59D8DE148CF1
           - name: DB_USER
@@ -59,12 +59,11 @@ spec:
           - name: REDIS_PORT
             value: "6379"
         resources:
-          # requests:
-          #   memory: 500Mi
-          #   cpu: 200m
-          # limits:
-          #   memory: "1Gi"
-          #   cpu: "500m"
+          requests:
+            memory: 500Mi
+            cpu: 200m
+          limits:
+             cpu: 500m
         ports:
         - containerPort: 8080
         volumeMounts:
