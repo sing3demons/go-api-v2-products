@@ -24,8 +24,8 @@ spec:
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
-          timeoutSeconds: 3
-          failureThreshold: 3
+          timeoutSeconds: 4
+          failureThreshold: 4
         livenessProbe:
           exec:
             command:
@@ -41,21 +41,39 @@ spec:
           - name: APP_ENV
             value: production
           - name: SECRET_KEY
-            value: 711E9CB1-3059-44FC-B8F7-59D8DE148CF1
+            valueFrom:
+              secretKeyRef:
+                key: SECRET_KEY
+                name: go-secret
           - name: DB_USER
-            value: postgres
+            valueFrom:
+              secretKeyRef:
+                key: DB_USER
+                name: go-secret
           - name: DB_NAME
-            value: product_shop
+            valueFrom:
+              secretKeyRef:
+                key: DB_NAME
+                name: go-secret
           - name: DB_PASSWORD
-            value: "12345678"
+            valueFrom:
+              secretKeyRef:
+                key: DB_PASSWORD
+                name: go-secret
           - name: DB_PORT
             value: "5432"
           - name: DB_HOST
-            value: postgres-service.postgres
+            valueFrom:
+              secretKeyRef:
+                key: DB_HOST
+                name: go-secret
           - name: GIN_MODE
-            value: debug
+            value: release
           - name: REDIS_HOST
-            value: redis-client.redis
+            valueFrom:
+              secretKeyRef:
+                key: REDIS_HOST
+                name: go-secret
           - name: REDIS_PORT
             value: "6379"
         resources:
