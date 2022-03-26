@@ -17,9 +17,6 @@ func Load() {
 	db.Find(&users)
 	if len(users) == 0 {
 		password := os.Getenv("DB_PASSWORD")
-		if password == "" {
-			password = "12345678"
-		}
 
 		db.Migrator().DropTable(&models.User{})
 		db.AutoMigrate(&models.User{})
