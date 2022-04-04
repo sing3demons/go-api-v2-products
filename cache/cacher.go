@@ -13,7 +13,6 @@ import (
 // ICacher is the interface for cache service
 type ICacher interface {
 	Set(key string, value interface{}, expire time.Duration) error
-
 	MSet(kv map[string]interface{}) error
 	Get(key string) (string, error)
 	MGet(keys []string) ([]interface{}, error)
@@ -21,7 +20,6 @@ type ICacher interface {
 	Expires(keys []string, expire time.Duration) error
 	Del(keys ...string) error
 	Exists(key string) (bool, error)
-
 	Close() error
 }
 
