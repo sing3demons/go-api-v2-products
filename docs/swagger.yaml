@@ -1,0 +1,121 @@
+basePath: /
+definitions:
+  controllers.pagingResult:
+    properties:
+      count:
+        type: integer
+      limit:
+        type: integer
+      nextPage:
+        type: integer
+      page:
+        type: integer
+      prevPage:
+        type: integer
+      totalPage:
+        type: integer
+    type: object
+  controllers.productRespons:
+    properties:
+      category:
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+        type: object
+      categoryId:
+        type: integer
+      desc:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    required:
+    - categoryId
+    type: object
+  controllers.productsPaging:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/controllers.productRespons'
+        type: array
+      paging:
+        $ref: '#/definitions/controllers.pagingResult'
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /api/v1/products:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.productsPaging'
+      summary: FindAll - query-products
+      tags:
+      - product
+  /api/v1/products/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.productRespons'
+      summary: FindOne - /:id
+      tags:
+      - product
+  /healthz:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+  /x:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+swagger: "2.0"

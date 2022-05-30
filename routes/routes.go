@@ -9,7 +9,6 @@ import (
 	"github.com/sing3demons/app/v2/store"
 )
 
-//Serve - middleware
 func Serve(r *gin.Engine) {
 	db := database.GetDB()
 	cacher := cache.NewCacher(cache.NewCacherConfig())

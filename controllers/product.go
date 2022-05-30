@@ -67,7 +67,14 @@ type Context interface {
 	JSON(int, interface{}) error
 }
 
-//FindAll - query-products
+// @Summary FindAll - query-products
+// @Tags         product
+// @Accept  json
+// @Produce  json
+// @Param page query uint false "page"
+// @Param limit query uint false "limit"
+// @Success 200 {object} productsPaging
+// @Router /api/v1/products [get]
 func (p *ProductHandler) FindAll(ctx *gin.Context) {
 	query1CacheKey := "items::product"
 	query2CacheKey := "items::page"
@@ -143,7 +150,13 @@ func (p *ProductHandler) FindAll(ctx *gin.Context) {
 
 }
 
-// FindOne - /:id
+// @Summary FindOne - /:id
+// @Tags         product
+// @Accept  json
+// @Produce  json
+// @Param id path int true "ID"
+// @Success 200 {object} productRespons
+// @Router /api/v1/products/{id} [get]
 func (p *ProductHandler) FindOne(ctx *gin.Context) {
 	product, err := p.findProductByID(ctx)
 	if err != nil {

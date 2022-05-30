@@ -16,6 +16,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	docs "github.com/sing3demons/app/v2/docs"
+	swagger "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var (
@@ -32,12 +35,13 @@ func init() {
 	}
 }
 
+// @title Swagger Example API
+// @version 1.0
+
+// @host localhost:8080
+// @BasePath /
 func main() {
-	_, err := os.Create("/tmp/live")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.Remove("/tmp/live")
+	livenessProbe()
 
 	database.InitDB()
 	seeds.Load()
@@ -45,16 +49,12 @@ func main() {
 	r := routes.NewMyRouter()
 	r.Static("/uploads", "./uploads")
 
-	r.GET("/healthz", func(c *gin.Context) {
-		c.Status(200)
-	})
+	docs.SwaggerInfo.BasePath = "/"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swagger.Handler))
 
-	r.GET("/x", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"buildcommit": buildcommit,
-			"buildtime":   buildtime,
-		})
-	})
+	r.GET("/healthz", health)
+
+	r.GET("/x", buildX)
 
 	//สร้าง folder
 	uploadDirs := [...]string{"products", "users"}
@@ -63,6 +63,7 @@ func main() {
 	}
 
 	routes.Serve(r)
+	// r.GET("/swagger/*any", ginSwagger.WrapHandler(swagger.Handler))
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -91,4 +92,31 @@ func main() {
 	if err := s.Shutdown(timeoutCtx); err != nil {
 		fmt.Println(err)
 	}
+}
+
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Router /healthz [get]
+func health(c *gin.Context) {
+	c.Status(200)
+}
+
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]any
+// @Router /x [get]
+func buildX(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"buildcommit": buildcommit,
+		"buildtime":   buildtime,
+	})
+}
+
+func livenessProbe() {
+	_, err := os.Create("/tmp/live")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove("/tmp/live")
 }
