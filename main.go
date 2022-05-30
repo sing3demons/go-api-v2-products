@@ -79,6 +79,7 @@ func main() {
 	}
 
 	go func() {
+		fmt.Printf("\nlisten and serve on http://localhost:8080/swagger/\n")
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}

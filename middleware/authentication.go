@@ -21,6 +21,12 @@ type formLogin struct {
 }
 
 //Login - sign in
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param login body formLogin true "login"
+// @Success 200 {string} string
+// @Router /api/v1/auth/login [post]
 func Login(c *gin.Context) {
 	var form formLogin
 	var user models.User

@@ -30,8 +30,6 @@ func Load() {
 	}
 	if os.Getenv("APP_ENV") != "production" {
 
-		fmt.Println("Starting...")
-
 		var categories []models.Category
 		err := db.Find(&categories).Error
 		if len(categories) == 0 && err == nil {

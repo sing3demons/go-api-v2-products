@@ -68,7 +68,7 @@ type Context interface {
 }
 
 // @Summary FindAll - query-products
-// @Tags         product
+// @Tags products
 // @Accept  json
 // @Produce  json
 // @Param page query uint false "page"
@@ -151,7 +151,7 @@ func (p *ProductHandler) FindAll(ctx *gin.Context) {
 }
 
 // @Summary FindOne - /:id
-// @Tags         product
+// @Tags products
 // @Accept  json
 // @Produce  json
 // @Param id path int true "ID"
@@ -170,15 +170,15 @@ func (p *ProductHandler) FindOne(ctx *gin.Context) {
 }
 
 // @Summary Create - insert data
-// @Tags         product
-// @Accept  mpfd 
-// @Produce  json 
+// @Tags products
+// @Accept  mpfd
+// @Produce  json
 // @Security BearerAuth
 // @Param name formData string true "name"
 // @Param desc formData string true "desc"
 // @Param price formData int true "price"
 // @Param image formData file true "image"
-// @Param categoryId formData uint true "categoryId"  
+// @Param categoryId formData uint true "categoryId"
 // @Success 200 {object} productRespons
 // @Router /api/v1/products [post]
 func (p *ProductHandler) Create(ctx *gin.Context) {
@@ -206,6 +206,19 @@ func (p *ProductHandler) Create(ctx *gin.Context) {
 }
 
 // UpdateAll - update all
+// @Summary update products
+// @Tags products
+// @Accept  mpfd
+// @Produce  json
+// @Security BearerAuth
+// @Param id path string true "id"
+// @Param name formData string false "name"
+// @Param desc formData string false "desc"
+// @Param price formData int false "price"
+// @Param image formData file false "image"
+// @Param categoryId formData uint false "categoryId"
+// @Success 200 {object} productRespons
+// @Router /api/v1/products/{id} [put]
 func (p *ProductHandler) UpdateAll(ctx *gin.Context) {
 	var form updateProductForm
 	if err := ctx.ShouldBind(&form); err != nil {

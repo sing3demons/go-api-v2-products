@@ -1,4 +1,25 @@
 definitions:
+  controllers.authForm:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  controllers.authResponse:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
   controllers.pagingResult:
     properties:
       count:
@@ -47,11 +68,170 @@ definitions:
       paging:
         $ref: '#/definitions/controllers.pagingResult'
     type: object
+  controllers.userResponse:
+    properties:
+      avatar:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+  middleware.formLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
 info:
   contact: {}
   title: Swagger Example API
   version: "1.0"
 paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/middleware.formLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - auth
+  /api/v1/auth/profile:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.authResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      tags:
+      - auth
+  /api/v1/auth/profile/{id}:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: avatar
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.userResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      tags:
+      - auth
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: avatar
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.userResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: register
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.authForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controllers.authResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            additionalProperties: true
+            type: object
+      tags:
+      - auth
   /api/v1/products:
     get:
       consumes:
@@ -74,7 +254,7 @@ paths:
             $ref: '#/definitions/controllers.productsPaging'
       summary: FindAll - query-products
       tags:
-      - product
+      - products
     post:
       consumes:
       - multipart/form-data
@@ -115,7 +295,7 @@ paths:
       - BearerAuth: []
       summary: Create - insert data
       tags:
-      - product
+      - products
   /api/v1/products/{id}:
     get:
       consumes:
@@ -135,7 +315,48 @@ paths:
             $ref: '#/definitions/controllers.productRespons'
       summary: FindOne - /:id
       tags:
-      - product
+      - products
+    put:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: name
+        in: formData
+        name: name
+        type: string
+      - description: desc
+        in: formData
+        name: desc
+        type: string
+      - description: price
+        in: formData
+        name: price
+        type: integer
+      - description: image
+        in: formData
+        name: image
+        type: file
+      - description: categoryId
+        in: formData
+        name: categoryId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.productRespons'
+      security:
+      - BearerAuth: []
+      summary: update products
+      tags:
+      - products
   /healthz:
     get:
       consumes:

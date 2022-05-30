@@ -32,12 +32,18 @@ type updateProfileForm struct {
 }
 
 type authResponse struct {
-	ID    uint   `json:"id"`
 	Email string `json:"email"`
 	Name  string `json:"name" `
 }
 
 //GetProfile - GET /api/v1/profile
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Success 200 {object} authResponse
+// @Failure 500 {object} map[string]any
+// @Router /api/v1/auth/profile [get]
 func (a *Auth) GetProfile(ctx *gin.Context) {
 	sub, _ := ctx.Get("sub")
 	var user models.User = sub.(models.User)
@@ -47,6 +53,13 @@ func (a *Auth) GetProfile(ctx *gin.Context) {
 }
 
 //SignUp - POST /api/v1/register
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param register body authForm true "register"
+// @Success 201 {object} authResponse
+// @Failure 422 {object} map[string]any
+// @Router /api/v1/auth/register [post]
 func (a *Auth) SignUp(ctx *gin.Context) {
 	var form authForm
 	if err := ctx.ShouldBindJSON(&form); err != nil {
@@ -67,6 +80,15 @@ func (a *Auth) SignUp(ctx *gin.Context) {
 }
 
 //UpdateImageProfile - upload image
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param id path uint true "id"
+// @Param avatar formData file true "avatar"
+// @Success 200 {object} userResponse
+// @Failure 500 {object} map[string]any
+// @Router /api/v1/auth/profile/{id} [patch]
 func (a *Auth) UpdateImageProfile(ctx *gin.Context) {
 
 	sub, _ := ctx.Get("sub")
@@ -81,6 +103,18 @@ func (a *Auth) UpdateImageProfile(ctx *gin.Context) {
 }
 
 //UpdateProfile - PUT /api/v1/profile
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param id path uint true "id"
+// @Param name formData string true "name"
+// @Param email formData string true "email"
+// @Param avatar formData file true "avatar"
+// @Success 200 {object} userResponse
+// @Failure 422 {object} map[string]any
+// @Failure 500 {object} map[string]any
+// @Router /api/v1/auth/profile/{id} [put]
 func (a *Auth) UpdateProfile(ctx *gin.Context) {
 	form := updateProfileForm{}
 	if err := ctx.ShouldBind(&form); err != nil {
