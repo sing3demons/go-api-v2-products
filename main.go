@@ -37,7 +37,9 @@ func init() {
 
 // @title Swagger Example API
 // @version 1.0
-
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 // @host localhost:8080
 // @BasePath /
 func main() {

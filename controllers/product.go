@@ -169,7 +169,18 @@ func (p *ProductHandler) FindOne(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"product": serializedProduct})
 }
 
-// Create - insert data
+// @Summary Create - insert data
+// @Tags         product
+// @Accept  mpfd 
+// @Produce  json 
+// @Security BearerAuth
+// @Param name formData string true "name"
+// @Param desc formData string true "desc"
+// @Param price formData int true "price"
+// @Param image formData file true "image"
+// @Param categoryId formData uint true "categoryId"  
+// @Success 200 {object} productRespons
+// @Router /api/v1/products [post]
 func (p *ProductHandler) Create(ctx *gin.Context) {
 	var form createProductForm
 	if err := ctx.ShouldBind(&form); err != nil {
