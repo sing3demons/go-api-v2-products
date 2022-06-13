@@ -25,7 +25,7 @@ services:
       command: redis-server /redis.conf
     webapi:
       container_name: webapi
-      image: go-api-v2-product:0.0.6
+      image: sing3demons/go-api-v2-product:0.0.7
       build: .
       ports:
         - 8080:8080
