@@ -44,7 +44,7 @@ type updateProductForm struct {
 	CategoryID uint                  `form:"categoryId"`
 }
 
-type productRespons struct {
+type productResponse struct {
 	ID         uint   `json:"id"`
 	Name       string `json:"name"`
 	Desc       string `json:"desc"`
@@ -58,7 +58,7 @@ type productRespons struct {
 }
 
 type productsPaging struct {
-	Items  []productRespons `json:"items"`
+	Items  []productResponse `json:"items"`
 	Paging *pagingResult    `json:"paging"`
 }
 
@@ -67,7 +67,8 @@ type Context interface {
 	JSON(int, interface{}) error
 }
 
-// @Summary FindAll - query-products
+// FindAll godoc
+// @Summary Show an products
 // @Tags products
 // @Accept  json
 // @Produce  json
@@ -79,7 +80,7 @@ func (p *ProductHandler) FindAll(ctx *gin.Context) {
 	query1CacheKey := "items::product"
 	query2CacheKey := "items::page"
 
-	serializedProduct := []productRespons{}
+	serializedProduct := []productResponse{}
 	var paging *pagingResult
 
 	cacheItems, err := p.cacher.MGet([]string{query1CacheKey, query2CacheKey})
@@ -129,7 +130,7 @@ func (p *ProductHandler) FindAll(ctx *gin.Context) {
 		timeToExpire := 10 * time.Second // m
 		fmt.Println("M_SET")
 
-		// Set cache using MSET
+		// Set cache using M SET
 		err := p.cacher.MSet(itemToCaches)
 		if err != nil {
 			log.Println(err.Error())
@@ -155,7 +156,7 @@ func (p *ProductHandler) FindAll(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "ID"
-// @Success 200 {object} productRespons
+// @Success 200 {object} productResponse
 // @Router /api/v1/products/{id} [get]
 func (p *ProductHandler) FindOne(ctx *gin.Context) {
 	product, err := p.findProductByID(ctx)
@@ -164,12 +165,14 @@ func (p *ProductHandler) FindOne(ctx *gin.Context) {
 		return
 	}
 
-	serializedProduct := productRespons{}
+	serializedProduct := productResponse{}
 	copier.Copy(&serializedProduct, &product)
 	ctx.JSON(http.StatusOK, gin.H{"product": serializedProduct})
 }
 
-// @Summary Create - insert data
+// Create godoc
+// @Summary add an product
+// @Description add by form product
 // @Tags products
 // @Accept  mpfd
 // @Produce  json
@@ -179,7 +182,7 @@ func (p *ProductHandler) FindOne(ctx *gin.Context) {
 // @Param price formData int true "price"
 // @Param image formData file true "image"
 // @Param categoryId formData uint true "categoryId"
-// @Success 200 {object} productRespons
+// @Success 200 {object} productResponse
 // @Router /api/v1/products [post]
 func (p *ProductHandler) Create(ctx *gin.Context) {
 	var form createProductForm
@@ -198,15 +201,16 @@ func (p *ProductHandler) Create(ctx *gin.Context) {
 
 	p.setProductImage(ctx, &product)
 
-	var serializedProduct productRespons
+	var serializedProduct productResponse
 	copier.Copy(&serializedProduct, &product)
 
 	ctx.JSON(http.StatusCreated, gin.H{"product": serializedProduct})
 
 }
 
-// UpdateAll - update all
-// @Summary update products
+// UpdateAll godoc
+// @Summary update an products
+// @Description update by form product
 // @Tags products
 // @Accept  mpfd
 // @Produce  json
@@ -217,7 +221,7 @@ func (p *ProductHandler) Create(ctx *gin.Context) {
 // @Param price formData int false "price"
 // @Param image formData file false "image"
 // @Param categoryId formData uint false "categoryId"
-// @Success 200 {object} productRespons
+// @Success 200 {object} productResponse
 // @Router /api/v1/products/{id} [put]
 func (p *ProductHandler) UpdateAll(ctx *gin.Context) {
 	var form updateProductForm
@@ -241,13 +245,25 @@ func (p *ProductHandler) UpdateAll(ctx *gin.Context) {
 
 	p.setProductImage(ctx, product)
 
-	serializedProduct := productRespons{}
+	serializedProduct := productResponse{}
 	copier.Copy(&serializedProduct, &product)
 	ctx.JSON(http.StatusOK, gin.H{"products": serializedProduct})
 
 }
 
-// Delete - Delete product
+// Delete godoc
+// @Summary	delete an product
+// @Description	delete by json product
+// @Tags	products
+// @Accept	json
+// @Produce	json
+// @Param id path string true "id"
+// @Success	200  string  string "{"message": "deleted"}"
+// @Failure	422  {object} string "Bad Request"
+// @Failure	404  {object}  map[string]any	"{"error": "not found"}"
+// @Router	/api/v1/categories/{id} [delete]
+// @Success 200 {object} productResponse
+// @Router /api/v1/products/{id} [delete]
 func (p *ProductHandler) Delete(ctx *gin.Context) {
 	product, err := p.findProductByID(ctx)
 	if err != nil {

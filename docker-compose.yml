@@ -4,9 +4,9 @@ services:
       container_name: postgres
       image: postgres:14.1
       environment:
-        POSTGRES_DB: ${DB_NAME}
-        POSTGRES_USER: ${DB_USER}
-        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB: product_shop
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: 12345678
       restart: always
       ports:
         - 5432:5432
@@ -25,22 +25,22 @@ services:
       command: redis-server /redis.conf
     webapi:
       container_name: webapi
-      image: go-api-v2-product:0.0.3
+      image: go-api-v2-product:0.0.6
       build: .
       ports:
-        - ${PORT}:${PORT}
+        - 8080:8080
       restart: always
       environment:
-        - PORT=${PORT}
-        - DB_USER=${DB_USER}
-        - DB_NAME=${DB_NAME}
-        - DB_PASSWORD=${DB_PASSWORD}
-        - DB_PORT=${DB_PORT}
-        - DB_HOST=${DB_HOSTV2}
-        - SECRET_KEY=${SECRET_KEY}
-        - APP_ENV=${APP_ENV}
-        - GIN_MODE=${GIN_MODE}
-        - REDIS_HOST=${REDIS_HOSTV2}
+        - PORT=8080
+        - DB_USER=postgres
+        - DB_NAME=product_shop
+        - DB_PASSWORD=12345678
+        - DB_PORT=5432
+        - DB_HOST=db
+        - SECRET_KEY=711E9CB1-3059-44FC-B8F7-59D8DE148CF1
+        - APP_ENV=deverlopment
+        - GIN_MODE=debug
+        - REDIS_HOST=redis
         - REDIS_PORT=6379
       volumes:
         - "./uploads:/uploads"

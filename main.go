@@ -22,8 +22,8 @@ import (
 )
 
 var (
-	buildcommit = "dev"
-	buildtime   = time.Now().String()
+	buildCommit = "dev"
+	buildTime   = time.Now().String()
 )
 
 func init() {
@@ -79,7 +79,7 @@ func main() {
 	}
 
 	go func() {
-		fmt.Printf("\nlisten and serve on http://localhost:8080/swagger/\n")
+		fmt.Printf("listen and serve on http://localhost:8080/swagger/\n")
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
@@ -111,8 +111,8 @@ func health(c *gin.Context) {
 // @Router /x [get]
 func buildX(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"buildcommit": buildcommit,
-		"buildtime":   buildtime,
+		"build_commit": buildCommit,
+		"build_time":   buildTime,
 	})
 }
 
