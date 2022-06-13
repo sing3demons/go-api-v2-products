@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/sing3demons/app/v2/models"
 	"github.com/sing3demons/app/v2/store"
 )
 
@@ -25,4 +27,13 @@ type categoryResponse struct {
 type categoryPaging struct {
 	Items  []categoryResponse `json:"items"`
 	Paging *pagingResult      `json:"paging"`
+}
+
+func (c *Category) findCategoryByID(ctx *gin.Context) (*models.Category, error) {
+	var category models.Category
+	id := ctx.Param("id")
+	if err := c.store.First(&category, id).Error; err != nil {
+		return nil, err
+	}
+	return &category, nil
 }

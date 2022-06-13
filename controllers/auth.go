@@ -36,7 +36,7 @@ type authResponse struct {
 	Name  string `json:"name" `
 }
 
-//GetProfile - GET /api/v1/profile
+//GetProfile godoc
 // @Tags auth
 // @Accept  json
 // @Produce  json
@@ -52,7 +52,7 @@ func (a *Auth) GetProfile(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"user": serializedUser})
 }
 
-//SignUp - POST /api/v1/register
+// SignUp godoc
 // @Tags auth
 // @Accept  json
 // @Produce  json
@@ -102,7 +102,7 @@ func (a *Auth) UpdateImageProfile(ctx *gin.Context) {
 
 }
 
-//UpdateProfile - PUT /api/v1/profile
+// UpdateProfile godoc
 // @Tags auth
 // @Accept  json
 // @Produce  json

@@ -140,12 +140,3 @@ func (c *Category) Delete(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
 }
-
-func (c *Category) findCategoryByID(ctx *gin.Context) (*models.Category, error) {
-	var category models.Category
-	id := ctx.Param("id")
-	if err := c.store.First(&category, id).Error; err != nil {
-		return nil, err
-	}
-	return &category, nil
-}
