@@ -65,7 +65,7 @@ go run main.go
 ```
 
 ```go to
-http://localhost:8080/swagger/
+http://localhost:8080/swagger/swagger/index.html
 ```
 
 ```tree
@@ -136,4 +136,20 @@ http://localhost:8080/swagger/
 └── uploads
     ├── products
     └── users
+```
+
+```chmod +x k8s.sh
+./k8s.sh 
+kubectl get po -n go-product  
+```
+#### output
+```output
+NAME                       READY   STATUS    RESTARTS   AGE
+go-server-5d4689dc-jdkjl   1/1     Running   0          114s
+redis-5c4c454dd-94xmj      1/1     Running   0          114s
+```
+
+#### open browser
+```
+http://kubernetes.docker.internal/swagger/index.html
 ```

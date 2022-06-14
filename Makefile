@@ -8,7 +8,6 @@ push:
 
 database up:
 	kubectl apply -f k8s/postgres/
-	kubectl apply -f k8s/redis/
 go run :
 	kubectl apply -f k8s/go-product
 
@@ -17,5 +16,4 @@ GET:
 
 clean:
 	kubectl delete ns postgres
-	kubectl delete ns redis
 	kubectl delete ns go-product

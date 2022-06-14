@@ -15,76 +15,74 @@ spec:
         app: server
     spec:
       containers:
-      - name: server
-        image: sing3demons/go-api-v2-product:0.0.5
-        imagePullPolicy: Always
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 4
-          failureThreshold: 4
-        livenessProbe:
-          exec:
-            command:
-              - cat
-              - /tmp/live
-          initialDelaySeconds: 5
-          periodSeconds: 30
-          timeoutSeconds: 30
-          failureThreshold: 5
-        env:
-          - name: PORT
-            value: "8080"
-          - name: APP_ENV
-            value: production
-          - name: SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                key: SECRET_KEY
-                name: go-secret
-          - name: DB_USER
-            valueFrom:
-              secretKeyRef:
-                key: DB_USER
-                name: go-secret
-          - name: DB_NAME
-            valueFrom:
-              secretKeyRef:
-                key: DB_NAME
-                name: go-secret
-          - name: DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: DB_PASSWORD
-                name: go-secret
-          - name: DB_PORT
-            value: "5432"
-          - name: DB_HOST
-            valueFrom:
-              secretKeyRef:
-                key: DB_HOST
-                name: go-secret
-          - name: GIN_MODE
-            value: release
-          - name: REDIS_HOST
-            valueFrom:
-              secretKeyRef:
-                key: REDIS_HOST
-                name: go-secret
-          - name: REDIS_PORT
-            value: "6379"
-        resources:
-          limits:
-             cpu: 500m
-        ports:
-        - containerPort: 8080
-        volumeMounts:
+        - name: server
+          image: sing3demons/go-api-v2-product:0.0.7
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 4
+          livenessProbe:
+            exec:
+              command:
+                - cat
+                - /tmp/live
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 30
+            failureThreshold: 5
+          env:
+            - name: PORT
+              value: "8080"
+            - name: APP_ENV
+              value: production
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SECRET_KEY
+                  name: go-secret
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: DB_USER
+                  name: go-secret
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: DB_NAME
+                  name: go-secret
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: DB_PASSWORD
+                  name: go-secret
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: DB_HOST
+                  name: go-secret
+            - name: GIN_MODE
+              value: release
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: REDIS_HOST
+                  name: go-secret
+            - name: REDIS_PORT
+              value: "6379"
+          resources:
+          ports:
+            - containerPort: 8080
+          volumeMounts:
             - mountPath: /uploads
               name: go-product
       volumes:
         - name: go-product
           persistentVolumeClaim:
-            claimName: app-pvc 
+            claimName: app-pvc

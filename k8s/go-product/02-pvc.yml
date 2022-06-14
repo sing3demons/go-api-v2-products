@@ -22,7 +22,6 @@ metadata:
   labels:
     app: go-product
 spec:
-  # storageClassName: manual 
   resources:
     requests:
       storage: 5Gi
