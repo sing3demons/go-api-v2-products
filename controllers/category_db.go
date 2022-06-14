@@ -26,7 +26,7 @@ func (c *Category) FindAll(ctx *gin.Context) {
 	serializedCategories := []categoryResponse{}
 	copier.Copy(&serializedCategories, &categories)
 
-	ctx.JSON(http.StatusCreated, gin.H{"categories": categoryPaging{Items: serializedCategories, Paging: p}})
+	ctx.JSON(http.StatusOK, gin.H{"categories": categoryPaging{Items: serializedCategories, Paging: p}})
 }
 
 // FindOne godoc
@@ -126,7 +126,7 @@ func (c *Category) Update(ctx *gin.Context) {
 // @Success	200  string  string "{"message": "success"}"
 // @Failure	422  {object} string "Bad Request"
 // @Failure	404  {object}  map[string]any	"{"error": "not found"}"
-// @Router	/api/v1/categories/{id} [delete]
+// @Router /api/v1/categories/{id} [delete]
 func (c *Category) Delete(ctx *gin.Context) {
 	category, err := c.findCategoryByID(ctx)
 	if err != nil {

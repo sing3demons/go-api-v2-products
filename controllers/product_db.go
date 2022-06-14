@@ -203,11 +203,9 @@ func (p *ProductHandler) UpdateAll(ctx *gin.Context) {
 // @Accept	json
 // @Produce	json
 // @Param id path string true "id"
-// @Success	200  string  string "{"message": "deleted"}"
+// @Success 200 {object} productResponse
 // @Failure	422  {object} string "Bad Request"
 // @Failure	404  {object}  map[string]any	"{"error": "not found"}"
-// @Router	/api/v1/categories/{id} [delete]
-// @Success 200 {object} productResponse
 // @Router /api/v1/products/{id} [delete]
 func (p *ProductHandler) Delete(ctx *gin.Context) {
 	product, err := p.findProductByID(ctx)
