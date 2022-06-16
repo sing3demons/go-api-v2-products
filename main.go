@@ -35,8 +35,10 @@ func init() {
 	}
 }
 
-// @title Swagger Example API
+// @title Swagger GO-PRODUCT API
 // @version 1.0
+// @schemes https http
+
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
@@ -79,7 +81,7 @@ func main() {
 	}
 
 	go func() {
-		fmt.Printf("listen and serve on http://localhost:8080/swagger/\n")
+		fmt.Printf("listen and serve on http://localhost:8080/swagger/index.html\n")
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}

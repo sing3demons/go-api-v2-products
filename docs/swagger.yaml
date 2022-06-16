@@ -130,7 +130,7 @@ definitions:
     type: object
 info:
   contact: {}
-  title: Swagger Example API
+  title: Swagger GO-PRODUCT API
   version: "1.0"
 paths:
   /api/v1/auth/login:
@@ -820,6 +820,9 @@ paths:
           schema:
             additionalProperties: true
             type: object
+schemes:
+- https
+- http
 securityDefinitions:
   BearerAuth:
     in: header
