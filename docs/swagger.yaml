@@ -821,7 +821,6 @@ paths:
             additionalProperties: true
             type: object
 schemes:
-- https
 - http
 securityDefinitions:
   BearerAuth:

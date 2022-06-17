@@ -7,7 +7,7 @@ Content-Type: application/json
 
 {
     "email": "admin@dev.com",
-    "password": "admin1234"
+    "password": "12345678"
 }
 
 ### Register 

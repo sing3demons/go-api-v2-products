@@ -37,7 +37,7 @@ func init() {
 
 // @title Swagger GO-PRODUCT API
 // @version 1.0
-// @schemes https http
+// @schemes http
 
 // @securityDefinitions.apikey BearerAuth
 // @in header

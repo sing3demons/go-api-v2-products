@@ -1283,7 +1283,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
 	BasePath:         "",
-	Schemes:          []string{"https", "http"},
+	Schemes:          []string{"http"},
 	Title:            "Swagger GO-PRODUCT API",
 	Description:      "",
 	InfoInstanceName: "swagger",
