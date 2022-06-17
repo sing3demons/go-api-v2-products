@@ -7,8 +7,8 @@ RUN go mod tidy
 ENV GOARCH=amd64
 
 RUN go build \
-    -ldflags "-X main.buildCommit=`git rev-parse --short HEAD` \
-    -X main.buildTime=`date "+%Y-%m-%dT%H:%M:%S%Z:00"`" \
+    -ldflags "-X main.buildcommit=`git rev-parse --short HEAD` \
+    -X main.buildtime=`date "+%Y-%m-%dT%H:%M:%S%Z:00"`" \
     -o /go/bin/app
 
 ## Deploy

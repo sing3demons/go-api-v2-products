@@ -22,8 +22,8 @@ import (
 )
 
 var (
-	buildCommit = "dev"
-	buildTime   = time.Now().String()
+	buildcommit = "dev"
+	buildtime   = time.Now().String()
 )
 
 func init() {
@@ -113,8 +113,8 @@ func health(c *gin.Context) {
 // @Router /x [get]
 func buildX(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"build_commit": buildCommit,
-		"build_time":   buildTime,
+		"build_commit": buildcommit,
+		"build_time":   buildtime,
 	})
 }
 

@@ -12,6 +12,7 @@ func NewMyRouter() *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{
 		"http://localhost:8080",
+		"http://kubernetes.docker.internal",
 	}
 	config.AllowHeaders = []string{
 		"Origin",
