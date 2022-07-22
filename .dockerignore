@@ -1,6 +1,5 @@
 **/.classpath
 **/.dockerignore
-# **/.env
 **/.gitignore
 **/.project
 **/.settings
@@ -22,9 +21,16 @@
 **/values.dev.yaml
 README.md
 .vscode
-textfile.txt
-runtest-products
-Procfile
+k8s
 Makefile
 .env.example
 test
+.env
+dev.env
+_data
+uploads
+docker-compose.yaml
+Dockerfile
+k8s-clean.sh
+k8s.sh
+swag.sh

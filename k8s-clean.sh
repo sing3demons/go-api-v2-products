@@ -1,1 +1,1 @@
-kubectl delete ns go-product postgres
+kubectl delete ns go-product postgres ingress-nginx 
